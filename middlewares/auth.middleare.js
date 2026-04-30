@@ -13,10 +13,10 @@ const isAuthMidleWare = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    req.userId = decoded.userId;
+    // req.userId = decoded.userId;
 
-    //     const user = await userModel.findById(decoded.userId);
-    // req.user = user;
+    const user = await userModel.findById(decoded.userId);
+    req.user = user;
 
     next();
   } catch (error) {
@@ -27,5 +27,5 @@ const isAuthMidleWare = async (req, res, next) => {
 };
 
 module.exports = {
-    isAuthMidleWare
-}
+  isAuthMidleWare,
+};
