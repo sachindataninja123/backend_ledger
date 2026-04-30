@@ -1,0 +1,28 @@
+{
+  "name": "backend_ledger",
+  "version": "1.0.0",
+  "description": "Bank transaction system backend",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npx nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sachindataninja123/backend_ledger.git"
+  },
+  "keywords": ["nodejs", "express", "backend", "api"],
+  "author": "Sachin Kushwaha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sachindataninja123/backend_ledger/issues"
+  },
+  "homepage": "https://github.com/sachindataninja123/backend_ledger#readme"
+}
