@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Password must be at least 6 characters long"],
       select: false,
     },
-    Name: {
+    name: {
       type: String,
       required: ["true", "Name is required for creating an account"],
     },
@@ -38,7 +38,7 @@ userSchema.pre("save", async function (next) {
 
     return next();
   } catch (error) {
-    next(error);
+    console.log(error);
   }
 });
 
