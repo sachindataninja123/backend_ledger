@@ -21,6 +21,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: ["true", "Name is required for creating an account"],
     },
+    systemUser: {
+      type: Boolean,
+      default: false,
+      immutable: true,
+      select: false,
+    },
   },
   {
     timestamps: true,

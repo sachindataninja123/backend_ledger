@@ -47,7 +47,19 @@ accountSchema.methods.getBalance = async function () {
         },
       },
     },
+    {
+      $project: {
+        _id: 0,
+        balance: { $subtract: ["$totalCredit", "$totalDebit"] },
+      },
+    },
   ]);
+
+  if (balanceData.length === 0) {
+    return 0;
+  }
+
+  return balanceData[0].balance;
 };
 
 const accountModel = mongoose.model("account", accountSchema);
