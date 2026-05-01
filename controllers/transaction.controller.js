@@ -65,6 +65,8 @@ const createTransaction = async (req, res) => {
         })
     }
 
+    //4 .Derive sender balance from ledger
+
   } catch (error) {
     return res.status(500).json({
       message: error.message,
