@@ -36,7 +36,7 @@ const createTransaction = async (req, res) => {
       idemPotencyKey: idemPotencyKey,
     });
 
-    if (!isTransactionAlreadyExists) {
+    if (isTransactionAlreadyExists) {
       if (isTransactionAlreadyExists.status === "COMPLETED") {
         return res.status(200).json({
           message: "Transaction already processed",
@@ -83,41 +83,57 @@ const createTransaction = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    const transaction = await transactionModel.create(
-      {
-        fromAccount,
-        toAccount,
-        amount,
-        idemPotencyKey,
-        status: "PENDING",
-      },
-      { session },
-    );
+    const transaction = (
+      await transactionModel.create(
+        [
+          {
+            fromAccount,
+            toAccount,
+            amount,
+            idemPotencyKey,
+            status: "PENDING",
+          },
+        ],
+        { session },
+      )
+    )[0];
 
     // create debit ledger entry
     const debitLedgerEntry = await ledgerModel.create(
-      {
-        account: fromAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "DEBIT",
-      },
+      [
+        {
+          account: fromAccount,
+          amount: amount,
+          transaction: transaction._id,
+          type: "DEBIT",
+        },
+      ],
       { session },
     );
 
+    await (() => {
+      return new Promise((resolve) => setTimeout(resolve, 100 * 1000));
+    })();
+
     // create credit ledger entry
-    const creditLedgerEntrt = await ledgerModel.create(
-      {
-        account: toAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "CREDIT",
-      },
+    const creditLedgerEntry = await ledgerModel.create(
+      [
+        {
+          account: toAccount,
+          amount: amount,
+          transaction: transaction._id,
+          type: "CREDIT",
+        },
+      ],
       { session },
     );
 
     // mark transaction completed
-    ((transaction.status = "COMPLETED"), await transaction.save({ session }));
+    await transactionModel.findByIdAndUpdate(
+      { _id: transaction._id },
+      { status: "COMPLETED" },
+      { session },
+    );
 
     // commit mongoDB session
     await session.commitTransaction();
