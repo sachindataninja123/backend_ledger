@@ -26,6 +26,49 @@ const isAuthMidleWare = async (req, res, next) => {
   }
 };
 
+const isSystemUserMiddleWare = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    const token =
+      req.cookies.token ||
+      (authHeader && authHeader.startsWith("Bearer ")
+        ? authHeader.split(" ")[1]
+        : null);
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Unauthorized access, token is missing",
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    const user = await userModel.findById(decoded.userId).select("+systemUser");
+
+    if (!user) {
+      return res.status(401).json({
+        message: "User not found",
+      });
+    }
+
+    if (!user.systemUser) {
+      return res.status(403).json({
+        message: "Forbidden access, not a system user",
+      });
+    }
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
+  }
+};
+
 module.exports = {
   isAuthMidleWare,
+  isSystemUserMiddleWare,
 };
