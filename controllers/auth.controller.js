@@ -1,7 +1,9 @@
 const userModel = require("../models/user.model");
 const jwt = require("jsonwebtoken");
-const emailService = require("../services/email.service")
+const emailService = require("../services/email.service");
+const tokenBlacklistModel = require("../models/blacklist.model");
 
+// register controller
 const userRegisterContoller = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -50,9 +52,7 @@ const userRegisterContoller = async (req, res) => {
       success: true,
     });
 
-    await emailService.sendRegistrationEmail(user.email , user.name)
-
-
+    await emailService.sendRegistrationEmail(user.email, user.name);
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -61,6 +61,7 @@ const userRegisterContoller = async (req, res) => {
   }
 };
 
+// login controller
 const userLoginController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -110,7 +111,6 @@ const userLoginController = async (req, res) => {
       },
       token: token,
     });
-
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -119,4 +119,38 @@ const userLoginController = async (req, res) => {
   }
 };
 
-module.exports = { userRegisterContoller, userLoginController };
+// logout controller
+const userLogoutController = async (req, res) => {
+  try {
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(200).json({
+        message: "User logged Out Successfully",
+        success: true,
+      });
+    }
+
+    await tokenBlacklistModel.create({
+      token: token,
+    });
+
+    res.clearCookie("token");
+
+    return res.status(200).json({
+      message: "User logged out successfully",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
+module.exports = {
+  userRegisterContoller,
+  userLoginController,
+  userLogoutController,
+};
